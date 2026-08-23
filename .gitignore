@@ -12,7 +12,7 @@ _autosave-*
 
 # KiCad lock files
 ~*.lck
-~*.csv#
+.~lock.*#
 
 # KiCad history folders
 .history/
