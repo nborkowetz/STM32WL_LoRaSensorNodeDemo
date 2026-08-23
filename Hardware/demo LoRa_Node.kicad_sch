@@ -1,0 +1,594 @@
+(kicad_sch
+	(version 20260306)
+	(generator "eeschema")
+	(generator_version "10.0")
+	(uuid "3e989608-eeda-4a48-bc6c-c5e1d1678702")
+	(paper "A4")
+	(title_block
+		(title "LoRa Node main")
+		(date "2025-11-28")
+		(rev "A")
+		(company "Nicola Borkowetz")
+	)
+	(lib_symbols)
+	(wire
+		(pts
+			(xy 101.6 78.74) (xy 128.27 78.74)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "071cfb5b-0b7a-4a36-83ba-211af06ba59f")
+	)
+	(wire
+		(pts
+			(xy 101.6 83.82) (xy 128.27 83.82)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "0b4b278c-2c42-48a9-b0c4-23cd2bbaf7fd")
+	)
+	(wire
+		(pts
+			(xy 166.37 100.33) (xy 179.07 100.33)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "14dc5d8e-7033-420f-8e47-bda37e5f76cd")
+	)
+	(wire
+		(pts
+			(xy 101.6 73.66) (xy 128.27 73.66)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "2c0bea32-978f-45bc-bda3-52d64154c86c")
+	)
+	(wire
+		(pts
+			(xy 166.37 85.09) (xy 179.07 85.09)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "3adfa53f-7167-427a-a41e-c7d5357ae490")
+	)
+	(wire
+		(pts
+			(xy 101.6 104.14) (xy 128.27 104.14)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "4ae86d35-8cfc-4181-b83c-ce071625caea")
+	)
+	(wire
+		(pts
+			(xy 101.6 109.22) (xy 128.27 109.22)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "5665c8ba-346c-447f-add7-55375bf45824")
+	)
+	(wire
+		(pts
+			(xy 101.6 86.36) (xy 128.27 86.36)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "9251a5a3-4dc9-4028-becd-ceace783f8f2")
+	)
+	(wire
+		(pts
+			(xy 166.37 93.98) (xy 179.07 93.98)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "980e4258-cedd-4e50-a7e2-70ed06897f7e")
+	)
+	(wire
+		(pts
+			(xy 166.37 91.44) (xy 179.07 91.44)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "ad5fcf95-7baf-4ae7-b250-d6853d3082e3")
+	)
+	(wire
+		(pts
+			(xy 101.6 76.2) (xy 128.27 76.2)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "c0f4f318-28c6-488c-88fb-66f4dc0fcc83")
+	)
+	(wire
+		(pts
+			(xy 101.6 106.68) (xy 128.27 106.68)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "caa277fd-f54c-4892-8ab5-c3e3943a228f")
+	)
+	(wire
+		(pts
+			(xy 101.6 88.9) (xy 128.27 88.9)
+		)
+		(stroke
+			(width 0)
+			(type default)
+		)
+		(uuid "f306917d-3377-4522-ba68-38de28b45283")
+	)
+	(sheet
+		(at 81.28 68.58)
+		(size 20.32 24.13)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "0344d43c-f7c9-496f-9384-ab56684cdcfd")
+		(property "Sheetname" "analog"
+			(at 81.28 67.8684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "analog.kicad_sch"
+			(at 81.28 93.2946 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "RS485-EN" input
+			(at 101.6 78.74 0)
+			(uuid "2760f016-efcd-441b-9eef-92f998a7a97e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RS485-IN" input
+			(at 101.6 73.66 0)
+			(uuid "9c7a022c-8745-4cfc-9296-8fa1e75b2e9f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RS485-OUT" output
+			(at 101.6 76.2 0)
+			(uuid "5b0e60c7-91e0-46b5-82db-dbe323c068bf")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "Analog-sens1" output
+			(at 101.6 83.82 0)
+			(uuid "baccc49f-4020-404e-9295-4e2e47ecfa37")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "Analog-sens2" output
+			(at 101.6 86.36 0)
+			(uuid "3e61cbdd-d835-4b02-a991-9d177fca0762")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "Analog-sens3" output
+			(at 101.6 88.9 0)
+			(uuid "802948bc-c640-4ecf-a5d1-206616d12156")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "demo LoRa_Node"
+				(path "/3e989608-eeda-4a48-bc6c-c5e1d1678702"
+					(page "5")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 128.27 68.58)
+		(size 38.1 45.72)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "035a042a-e27c-47a0-bc8b-0546484d86a7")
+		(property "Sheetname" "MCU"
+			(at 128.27 67.8684 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "MCU.kicad_sch"
+			(at 128.27 114.8846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "12V-EN" output
+			(at 128.27 104.14 180)
+			(uuid "9d98345b-b586-4b5a-a945-691db195c744")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ADC-CH2" input
+			(at 128.27 83.82 180)
+			(uuid "09a3ff68-b053-412d-aa09-ba962801ebad")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ADC-CH3" input
+			(at 128.27 86.36 180)
+			(uuid "a4ad6afc-d9d3-435c-ae2f-415a1a4d1056")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "ADC-CH4" input
+			(at 128.27 88.9 180)
+			(uuid "d94f4932-2142-4ee6-b475-8ec16a7ade6f")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RF-Switch-MCU" output
+			(at 166.37 85.09 0)
+			(uuid "48de0d0d-77f7-482e-b060-8005281dada1")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RFI_N-MCU" input
+			(at 166.37 91.44 0)
+			(uuid "2eb31a16-09f6-4c84-9f78-ac47d204b731")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RFI_P-MCU" input
+			(at 166.37 93.98 0)
+			(uuid "c06261a7-559c-4aca-ba50-0b4897825fa9")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RFO_HP-MCU" output
+			(at 166.37 100.33 0)
+			(uuid "d34593de-4716-4702-9d00-5354f817920a")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "RS485-EN" output
+			(at 128.27 78.74 180)
+			(uuid "10810695-094b-4279-871a-e5803dfadf8d")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "UART-RX" input
+			(at 128.27 76.2 180)
+			(uuid "4a68ba23-c875-4e80-90ac-12901ddd5564")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "UART-TX" output
+			(at 128.27 73.66 180)
+			(uuid "d3614672-6017-41c0-a5a9-3ed4144350d6")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "USB_MCU+" bidirectional
+			(at 128.27 106.68 180)
+			(uuid "5214f743-6c7c-463f-81a9-23e38e3bddc7")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "USB_MCU-" bidirectional
+			(at 128.27 109.22 180)
+			(uuid "ca24f347-3d77-4d26-a316-e470bc22e211")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "demo LoRa_Node"
+				(path "/3e989608-eeda-4a48-bc6c-c5e1d1678702"
+					(page "3")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 81.28 97.79)
+		(size 20.32 16.51)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "98bcb7c1-a14b-48e1-9268-def1b948ddb6")
+		(property "Sheetname" "Power"
+			(at 81.28 97.0784 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "Power.kicad_sch"
+			(at 81.28 114.8846 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "USB+" bidirectional
+			(at 101.6 106.68 0)
+			(uuid "a0b74c4a-db31-449b-b623-66db4e5cc81b")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "USB-" bidirectional
+			(at 101.6 109.22 0)
+			(uuid "a1dfe96b-4ea3-4ba7-ab5b-c4cf9f72d096")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(pin "12V_EN" input
+			(at 101.6 104.14 0)
+			(uuid "db03ea00-1b03-4e14-8a4d-e4f81f76985e")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify right)
+			)
+		)
+		(instances
+			(project "demo LoRa_Node"
+				(path "/3e989608-eeda-4a48-bc6c-c5e1d1678702"
+					(page "2")
+				)
+			)
+		)
+	)
+	(sheet
+		(at 179.07 80.01)
+		(size 25.4 26.67)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(fields_autoplaced yes)
+		(stroke
+			(width 0.1524)
+			(type solid)
+		)
+		(fill
+			(color 0 0 0 0)
+		)
+		(uuid "f7bd652a-238e-4a19-a7e7-e5372eb58a34")
+		(property "Sheetname" "LoRa RF"
+			(at 179.07 79.2984 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left bottom)
+			)
+		)
+		(property "Sheetfile" "LoRa RF.kicad_sch"
+			(at 179.07 107.2646 0)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left top)
+			)
+		)
+		(pin "RF-Switch" input
+			(at 179.07 85.09 180)
+			(uuid "43cc41d5-2d7c-4b97-9ed2-d27e00d7ba77")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RFI_N" output
+			(at 179.07 91.44 180)
+			(uuid "8d296ef0-3d07-4f5f-aa92-451bc3d4efdb")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RFI_P" output
+			(at 179.07 93.98 180)
+			(uuid "b4c2f03b-e039-4336-aa29-9cc86c5e6962")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "RFO_HP" input
+			(at 179.07 100.33 180)
+			(uuid "e3d99963-2132-4ff9-9334-a46af3e68fd8")
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(instances
+			(project "demo LoRa_Node"
+				(path "/3e989608-eeda-4a48-bc6c-c5e1d1678702"
+					(page "4")
+				)
+			)
+		)
+	)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)
