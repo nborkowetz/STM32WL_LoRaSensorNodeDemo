@@ -1,0 +1,25 @@
+# KiCad backups / temporary files
+*-backups/
+_autosave-*
+*.bak
+*.kicad_pcb-bak
+*.kicad_sch-bak
+*~
+*.tmp
+
+# KiCad local/user state
+*.kicad_prl
+
+# KiCad lock files
+~*.lck
+~*.csv#
+
+# KiCad history folders
+.history/
+
+# Legacy cache
+fp-info-cache
+
+# OS junk
+.DS_Store
+Thumbs.db
