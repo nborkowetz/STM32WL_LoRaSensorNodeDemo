@@ -29,6 +29,8 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32wlxx_hal.h"
 
+#include "stm32wlxx_nucleo.h"
+
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 
@@ -53,9 +55,9 @@ extern "C" {
 void Error_Handler(void);
 void MX_DMA_Init(void);
 void MX_ADC_Init(void);
-void MX_LPUART1_UART_Init(void);
 void MX_RTC_Init(void);
 void MX_SUBGHZ_Init(void);
+void MX_USART2_UART_Init(void);
 
 /* USER CODE BEGIN EFP */
 
@@ -65,6 +67,21 @@ void MX_SUBGHZ_Init(void);
 #define RTC_N_PREDIV_S 10
 #define RTC_PREDIV_S ((1<<RTC_N_PREDIV_S)-1)
 #define RTC_PREDIV_A ((1<<(15-RTC_N_PREDIV_S))-1)
+#define RTC_N_PREDIV_S 10
+#define RTC_PREDIV_S ((1 << RTC_N_PREDIV_S) - 1)
+#define RTC_PREDIV_A ((1 << (15 - RTC_N_PREDIV_S)) - 1)
+#define RCC_OSC32_IN_Pin GPIO_PIN_14
+#define RCC_OSC32_IN_GPIO_Port GPIOC
+#define RCC_OSC32_OUT_Pin GPIO_PIN_15
+#define RCC_OSC32_OUT_GPIO_Port GPIOC
+#define EN_12V_DCDC_Pin GPIO_PIN_13
+#define EN_12V_DCDC_GPIO_Port GPIOC
+#define FE_CTRL3_Pin GPIO_PIN_3
+#define FE_CTRL3_GPIO_Port GPIOC
+#define FE_CTRL2_Pin GPIO_PIN_5
+#define FE_CTRL2_GPIO_Port GPIOC
+#define FE_CTRL1_Pin GPIO_PIN_4
+#define FE_CTRL1_GPIO_Port GPIOC
 
 /* USER CODE BEGIN Private defines */
 

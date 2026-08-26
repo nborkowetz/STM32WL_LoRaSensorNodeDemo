@@ -57,10 +57,10 @@
 /* External variables --------------------------------------------------------*/
 extern DMA_HandleTypeDef hdma_adc;
 extern ADC_HandleTypeDef hadc;
-extern DMA_HandleTypeDef hdma_usart1_rx;
-extern DMA_HandleTypeDef hdma_usart1_tx;
-extern UART_HandleTypeDef hlpuart1;
-extern UART_HandleTypeDef huart1;
+extern RTC_HandleTypeDef hrtc;
+extern TIM_HandleTypeDef htim2;
+extern DMA_HandleTypeDef hdma_usart2_tx;
+extern UART_HandleTypeDef huart2;
 /* USER CODE BEGIN EV */
 
 /* USER CODE END EV */
@@ -204,6 +204,48 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles RTC Tamper, RTC TimeStamp, LSECSS and RTC SSRU Interrupts.
+  */
+void TAMP_STAMP_LSECSS_SSRU_IRQHandler(void)
+{
+  /* USER CODE BEGIN TAMP_STAMP_LSECSS_SSRU_IRQn 0 */
+
+  /* USER CODE END TAMP_STAMP_LSECSS_SSRU_IRQn 0 */
+  HAL_RTCEx_SSRUIRQHandler(&hrtc);
+  /* USER CODE BEGIN TAMP_STAMP_LSECSS_SSRU_IRQn 1 */
+
+  /* USER CODE END TAMP_STAMP_LSECSS_SSRU_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line 0 Interrupt.
+  */
+void EXTI0_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI0_IRQn 0 */
+
+  /* USER CODE END EXTI0_IRQn 0 */
+  BSP_PB_IRQHandler(BUTTON_SW1);
+  /* USER CODE BEGIN EXTI0_IRQn 1 */
+
+  /* USER CODE END EXTI0_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI Line 1 Interrupt.
+  */
+void EXTI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI1_IRQn 0 */
+
+  /* USER CODE END EXTI1_IRQn 0 */
+  BSP_PB_IRQHandler(BUTTON_SW2);
+  /* USER CODE BEGIN EXTI1_IRQn 1 */
+
+  /* USER CODE END EXTI1_IRQn 1 */
+}
+
+/**
   * @brief This function handles DMA1 Channel 1 Interrupt.
   */
 void DMA1_Channel1_IRQHandler(void)
@@ -218,31 +260,17 @@ void DMA1_Channel1_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles DMA1 Channel 2 Interrupt.
+  * @brief This function handles DMA1 Channel 5 Interrupt.
   */
-void DMA1_Channel2_IRQHandler(void)
+void DMA1_Channel5_IRQHandler(void)
 {
-  /* USER CODE BEGIN DMA1_Channel2_IRQn 0 */
+  /* USER CODE BEGIN DMA1_Channel5_IRQn 0 */
 
-  /* USER CODE END DMA1_Channel2_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart1_rx);
-  /* USER CODE BEGIN DMA1_Channel2_IRQn 1 */
+  /* USER CODE END DMA1_Channel5_IRQn 0 */
+  HAL_DMA_IRQHandler(&hdma_usart2_tx);
+  /* USER CODE BEGIN DMA1_Channel5_IRQn 1 */
 
-  /* USER CODE END DMA1_Channel2_IRQn 1 */
-}
-
-/**
-  * @brief This function handles DMA1 Channel 3 Interrupt.
-  */
-void DMA1_Channel3_IRQHandler(void)
-{
-  /* USER CODE BEGIN DMA1_Channel3_IRQn 0 */
-
-  /* USER CODE END DMA1_Channel3_IRQn 0 */
-  HAL_DMA_IRQHandler(&hdma_usart1_tx);
-  /* USER CODE BEGIN DMA1_Channel3_IRQn 1 */
-
-  /* USER CODE END DMA1_Channel3_IRQn 1 */
+  /* USER CODE END DMA1_Channel5_IRQn 1 */
 }
 
 /**
@@ -260,31 +288,59 @@ void ADC_IRQHandler(void)
 }
 
 /**
-  * @brief This function handles USART1 Interrupt.
+  * @brief This function handles EXTI Lines [9:5] Interrupt.
   */
-void USART1_IRQHandler(void)
+void EXTI9_5_IRQHandler(void)
 {
-  /* USER CODE BEGIN USART1_IRQn 0 */
+  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
+  /* USER CODE END EXTI9_5_IRQn 0 */
+  BSP_PB_IRQHandler(BUTTON_SW3);
+  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 
-  /* USER CODE END USART1_IRQn 1 */
+  /* USER CODE END EXTI9_5_IRQn 1 */
 }
 
 /**
-  * @brief This function handles LPUART1 Interrupt.
+  * @brief This function handles TIM2 Global Interrupt.
   */
-void LPUART1_IRQHandler(void)
+void TIM2_IRQHandler(void)
 {
-  /* USER CODE BEGIN LPUART1_IRQn 0 */
+  /* USER CODE BEGIN TIM2_IRQn 0 */
 
-  /* USER CODE END LPUART1_IRQn 0 */
-  HAL_UART_IRQHandler(&hlpuart1);
-  /* USER CODE BEGIN LPUART1_IRQn 1 */
+  /* USER CODE END TIM2_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim2);
+  /* USER CODE BEGIN TIM2_IRQn 1 */
 
-  /* USER CODE END LPUART1_IRQn 1 */
+  /* USER CODE END TIM2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles USART2 Interrupt.
+  */
+void USART2_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART2_IRQn 0 */
+
+  /* USER CODE END USART2_IRQn 0 */
+  HAL_UART_IRQHandler(&huart2);
+  /* USER CODE BEGIN USART2_IRQn 1 */
+
+  /* USER CODE END USART2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles RTC Alarms (A and B) Interrupt.
+  */
+void RTC_Alarm_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_Alarm_IRQn 0 */
+
+  /* USER CODE END RTC_Alarm_IRQn 0 */
+  HAL_RTC_AlarmIRQHandler(&hrtc);
+  /* USER CODE BEGIN RTC_Alarm_IRQn 1 */
+
+  /* USER CODE END RTC_Alarm_IRQn 1 */
 }
 
 /**
@@ -297,8 +353,6 @@ void DMAMUX1_OVR_IRQHandler(void)
   /* USER CODE END DMAMUX1_OVR_IRQn 0 */
   // Handle DMA1_Channel1
   HAL_DMAEx_MUX_IRQHandler(&hdma_adc);
-  // Handle DMA1_Channel2
-  HAL_DMAEx_MUX_IRQHandler(&hdma_usart1_rx);
   /* USER CODE BEGIN DMAMUX1_OVR_IRQn 1 */
 
   /* USER CODE END DMAMUX1_OVR_IRQn 1 */

@@ -41,13 +41,9 @@
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
+
 ADC_HandleTypeDef hadc;
 DMA_HandleTypeDef hdma_adc;
-
-UART_HandleTypeDef hlpuart1;
-UART_HandleTypeDef huart1;
-DMA_HandleTypeDef hdma_usart1_rx;
-DMA_HandleTypeDef hdma_usart1_tx;
 
 RNG_HandleTypeDef hrng;
 
@@ -57,6 +53,9 @@ SUBGHZ_HandleTypeDef hsubghz;
 
 TIM_HandleTypeDef htim2;
 
+UART_HandleTypeDef huart2;
+DMA_HandleTypeDef hdma_usart2_tx;
+
 /* USER CODE BEGIN PV */
 
 /* USER CODE END PV */
@@ -64,7 +63,6 @@ TIM_HandleTypeDef htim2;
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
 static void MX_GPIO_Init(void);
-static void MX_USART1_UART_Init(void);
 static void MX_RNG_Init(void);
 static void MX_TIM2_Init(void);
 /* USER CODE BEGIN PFP */
@@ -106,20 +104,30 @@ int main(void)
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
   MX_DMA_Init();
-  MX_LPUART1_UART_Init();
-  MX_USART1_UART_Init();
+  MX_ADC_Init();
   MX_RNG_Init();
   MX_RTC_Init();
-  MX_LoRaWAN_Init();
   MX_TIM2_Init();
+  MX_LoRaWAN_Init();
   /* USER CODE BEGIN 2 */
 
   /* USER CODE END 2 */
+
+  /* Initialize leds */
+  BSP_LED_Init(LED_BLUE);
+  BSP_LED_Init(LED_GREEN);
+  BSP_LED_Init(LED_RED);
+
+  /* Initialize USER push-button, will be used to trigger an interrupt each time it's pressed.*/
+  BSP_PB_Init(BUTTON_SW1, BUTTON_MODE_EXTI);
+  BSP_PB_Init(BUTTON_SW2, BUTTON_MODE_EXTI);
+  BSP_PB_Init(BUTTON_SW3, BUTTON_MODE_EXTI);
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+
     /* USER CODE END WHILE */
     MX_LoRaWAN_Process();
 
@@ -137,21 +145,27 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Configure LSE Drive Capability
+  */
+  HAL_PWR_EnableBkUpAccess();
+  __HAL_RCC_LSEDRIVE_CONFIG(RCC_LSEDRIVE_LOW);
+
   /** Configure the main internal regulator output voltage
   */
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
-  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE|RCC_OSCILLATORTYPE_LSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS_PWR;
+  RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.HSEDiv = RCC_HSE_DIV1;
   RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
   RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
   RCC_OscInitStruct.PLL.PLLM = RCC_PLLM_DIV4;
-  RCC_OscInitStruct.PLL.PLLN = 15;
+  RCC_OscInitStruct.PLL.PLLN = 12;
   RCC_OscInitStruct.PLL.PLLP = RCC_PLLP_DIV2;
-  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV2;
+  RCC_OscInitStruct.PLL.PLLR = RCC_PLLR_DIV3;
   RCC_OscInitStruct.PLL.PLLQ = RCC_PLLQ_DIV8;
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
@@ -163,13 +177,13 @@ void SystemClock_Config(void)
   RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK3|RCC_CLOCKTYPE_HCLK
                               |RCC_CLOCKTYPE_SYSCLK|RCC_CLOCKTYPE_PCLK1
                               |RCC_CLOCKTYPE_PCLK2;
-  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSE;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
   RCC_ClkInitStruct.AHBCLK3Divider = RCC_SYSCLK_DIV1;
 
-  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK)
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
   {
     Error_Handler();
   }
@@ -210,7 +224,7 @@ void MX_ADC_Init(void)
   hadc.Init.ExternalTrigConvEdge = ADC_EXTERNALTRIGCONVEDGE_RISING;
   hadc.Init.DMAContinuousRequests = ENABLE;
   hadc.Init.Overrun = ADC_OVR_DATA_PRESERVED;
-  hadc.Init.SamplingTimeCommon1 = ADC_SAMPLETIME_39CYCLES_5;
+  hadc.Init.SamplingTimeCommon1 = ADC_SAMPLETIME_19CYCLES_5;
   hadc.Init.SamplingTimeCommon2 = ADC_SAMPLETIME_160CYCLES_5;
   hadc.Init.OversamplingMode = DISABLE;
   hadc.Init.TriggerFrequencyMode = ADC_TRIGGER_FREQ_HIGH;
@@ -221,7 +235,7 @@ void MX_ADC_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_2;
+  sConfig.Channel = ADC_CHANNEL_0;
   sConfig.Rank = ADC_REGULAR_RANK_1;
   sConfig.SamplingTime = ADC_SAMPLINGTIME_COMMON_1;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
@@ -231,7 +245,7 @@ void MX_ADC_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_3;
+  sConfig.Channel = ADC_CHANNEL_1;
   sConfig.Rank = ADC_REGULAR_RANK_2;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
@@ -240,7 +254,7 @@ void MX_ADC_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_4;
+  sConfig.Channel = ADC_CHANNEL_2;
   sConfig.Rank = ADC_REGULAR_RANK_3;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
   {
@@ -249,7 +263,7 @@ void MX_ADC_Init(void)
 
   /** Configure Regular Channel
   */
-  sConfig.Channel = ADC_CHANNEL_TEMPSENSOR;
+  sConfig.Channel = ADC_CHANNEL_VREFINT;
   sConfig.Rank = ADC_REGULAR_RANK_4;
   sConfig.SamplingTime = ADC_SAMPLINGTIME_COMMON_2;
   if (HAL_ADC_ConfigChannel(&hadc, &sConfig) != HAL_OK)
@@ -259,102 +273,6 @@ void MX_ADC_Init(void)
   /* USER CODE BEGIN ADC_Init 2 */
 
   /* USER CODE END ADC_Init 2 */
-
-}
-
-/**
-  * @brief LPUART1 Initialization Function
-  * @param None
-  * @retval None
-  */
-void MX_LPUART1_UART_Init(void)
-{
-
-  /* USER CODE BEGIN LPUART1_Init 0 */
-
-  /* USER CODE END LPUART1_Init 0 */
-
-  /* USER CODE BEGIN LPUART1_Init 1 */
-
-  /* USER CODE END LPUART1_Init 1 */
-  hlpuart1.Instance = LPUART1;
-  hlpuart1.Init.BaudRate = 115200;
-  hlpuart1.Init.WordLength = UART_WORDLENGTH_8B;
-  hlpuart1.Init.StopBits = UART_STOPBITS_1;
-  hlpuart1.Init.Parity = UART_PARITY_NONE;
-  hlpuart1.Init.Mode = UART_MODE_TX_RX;
-  hlpuart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  hlpuart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  hlpuart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  hlpuart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  hlpuart1.FifoMode = UART_FIFOMODE_DISABLE;
-  if (HAL_UART_Init(&hlpuart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&hlpuart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&hlpuart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&hlpuart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN LPUART1_Init 2 */
-
-  /* USER CODE END LPUART1_Init 2 */
-
-}
-
-/**
-  * @brief USART1 Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_USART1_UART_Init(void)
-{
-
-  /* USER CODE BEGIN USART1_Init 0 */
-
-  /* USER CODE END USART1_Init 0 */
-
-  /* USER CODE BEGIN USART1_Init 1 */
-
-  /* USER CODE END USART1_Init 1 */
-  huart1.Instance = USART1;
-  huart1.Init.BaudRate = 115200;
-  huart1.Init.WordLength = UART_WORDLENGTH_8B;
-  huart1.Init.StopBits = UART_STOPBITS_1;
-  huart1.Init.Parity = UART_PARITY_NONE;
-  huart1.Init.Mode = UART_MODE_TX_RX;
-  huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-  huart1.Init.OverSampling = UART_OVERSAMPLING_16;
-  huart1.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-  huart1.Init.ClockPrescaler = UART_PRESCALER_DIV1;
-  huart1.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  if (HAL_UART_Init(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetTxFifoThreshold(&huart1, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_SetRxFifoThreshold(&huart1, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_UARTEx_DisableFifoMode(&huart1) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN USART1_Init 2 */
-
-  /* USER CODE END USART1_Init 2 */
 
 }
 
@@ -397,8 +315,7 @@ void MX_RTC_Init(void)
 
   /* USER CODE END RTC_Init 0 */
 
-  RTC_TimeTypeDef sTime = {0};
-  RTC_DateTypeDef sDate = {0};
+  RTC_AlarmTypeDef sAlarm = {0};
 
   /* USER CODE BEGIN RTC_Init 1 */
 
@@ -407,15 +324,13 @@ void MX_RTC_Init(void)
   /** Initialize RTC Only
   */
   hrtc.Instance = RTC;
-  hrtc.Init.HourFormat = RTC_HOURFORMAT_24;
-  hrtc.Init.AsynchPrediv = 127;
-  hrtc.Init.SynchPrediv = 255;
+  hrtc.Init.AsynchPrediv = RTC_PREDIV_A;
   hrtc.Init.OutPut = RTC_OUTPUT_DISABLE;
   hrtc.Init.OutPutRemap = RTC_OUTPUT_REMAP_NONE;
   hrtc.Init.OutPutPolarity = RTC_OUTPUT_POLARITY_HIGH;
   hrtc.Init.OutPutType = RTC_OUTPUT_TYPE_OPENDRAIN;
   hrtc.Init.OutPutPullUp = RTC_OUTPUT_PULLUP_NONE;
-  hrtc.Init.BinMode = RTC_BINARY_NONE;
+  hrtc.Init.BinMode = RTC_BINARY_ONLY;
   if (HAL_RTC_Init(&hrtc) != HAL_OK)
   {
     Error_Handler();
@@ -427,28 +342,19 @@ void MX_RTC_Init(void)
 
   /** Initialize RTC and set the Time and Date
   */
-  sTime.Hours = 0x0;
-  sTime.Minutes = 0x0;
-  sTime.Seconds = 0x0;
-  sTime.DayLightSaving = RTC_DAYLIGHTSAVING_NONE;
-  sTime.StoreOperation = RTC_STOREOPERATION_RESET;
-  if (HAL_RTC_SetTime(&hrtc, &sTime, RTC_FORMAT_BCD) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  sDate.WeekDay = RTC_WEEKDAY_MONDAY;
-  sDate.Month = RTC_MONTH_JANUARY;
-  sDate.Date = 0x1;
-  sDate.Year = 0x0;
-
-  if (HAL_RTC_SetDate(&hrtc, &sDate, RTC_FORMAT_BCD) != HAL_OK)
+  if (HAL_RTCEx_SetSSRU_IT(&hrtc) != HAL_OK)
   {
     Error_Handler();
   }
 
-  /** Enable the WakeUp
+  /** Enable the Alarm A
   */
-  if (HAL_RTCEx_SetWakeUpTimer(&hrtc, 0, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK)
+  sAlarm.BinaryAutoClr = RTC_ALARMSUBSECONDBIN_AUTOCLR_NO;
+  sAlarm.AlarmTime.SubSeconds = 0x0;
+  sAlarm.AlarmMask = RTC_ALARMMASK_NONE;
+  sAlarm.AlarmSubSecondMask = RTC_ALARMSUBSECONDBINMASK_NONE;
+  sAlarm.Alarm = RTC_ALARM_A;
+  if (HAL_RTC_SetAlarm_IT(&hrtc, &sAlarm, 0) != HAL_OK)
   {
     Error_Handler();
   }
@@ -530,6 +436,54 @@ static void MX_TIM2_Init(void)
 }
 
 /**
+  * @brief USART2 Initialization Function
+  * @param None
+  * @retval None
+  */
+void MX_USART2_UART_Init(void)
+{
+
+  /* USER CODE BEGIN USART2_Init 0 */
+
+  /* USER CODE END USART2_Init 0 */
+
+  /* USER CODE BEGIN USART2_Init 1 */
+
+  /* USER CODE END USART2_Init 1 */
+  huart2.Instance = USART2;
+  huart2.Init.BaudRate = 115200;
+  huart2.Init.WordLength = UART_WORDLENGTH_8B;
+  huart2.Init.StopBits = UART_STOPBITS_1;
+  huart2.Init.Parity = UART_PARITY_NONE;
+  huart2.Init.Mode = UART_MODE_TX_RX;
+  huart2.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart2.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart2.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart2.Init.ClockPrescaler = UART_PRESCALER_DIV1;
+  huart2.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  if (HAL_UART_Init(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetTxFifoThreshold(&huart2, UART_TXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_SetRxFifoThreshold(&huart2, UART_RXFIFO_THRESHOLD_1_8) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  if (HAL_UARTEx_DisableFifoMode(&huart2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN USART2_Init 2 */
+
+  /* USER CODE END USART2_Init 2 */
+
+}
+
+/**
   * Enable DMA controller clock
   */
 void MX_DMA_Init(void)
@@ -543,12 +497,9 @@ void MX_DMA_Init(void)
   /* DMA1_Channel1_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMA1_Channel1_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-  /* DMA1_Channel2_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel2_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel2_IRQn);
-  /* DMA1_Channel3_IRQn interrupt configuration */
-  HAL_NVIC_SetPriority(DMA1_Channel3_IRQn, 0, 0);
-  HAL_NVIC_EnableIRQ(DMA1_Channel3_IRQn);
+  /* DMA1_Channel5_IRQn interrupt configuration */
+  HAL_NVIC_SetPriority(DMA1_Channel5_IRQn, 2, 0);
+  HAL_NVIC_EnableIRQ(DMA1_Channel5_IRQn);
   /* DMAMUX1_OVR_IRQn interrupt configuration */
   HAL_NVIC_SetPriority(DMAMUX1_OVR_IRQn, 0, 0);
   HAL_NVIC_EnableIRQ(DMAMUX1_OVR_IRQn);
@@ -562,13 +513,32 @@ void MX_DMA_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
+  GPIO_InitTypeDef GPIO_InitStruct = {0};
   /* USER CODE BEGIN MX_GPIO_Init_1 */
 
   /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
+
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOC, EN_12V_DCDC_Pin|FE_CTRL3_Pin|FE_CTRL2_Pin|FE_CTRL1_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : EN_12V_DCDC_Pin */
+  GPIO_InitStruct.Pin = EN_12V_DCDC_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(EN_12V_DCDC_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : FE_CTRL3_Pin FE_CTRL2_Pin FE_CTRL1_Pin */
+  GPIO_InitStruct.Pin = FE_CTRL3_Pin|FE_CTRL2_Pin|FE_CTRL1_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /* USER CODE BEGIN MX_GPIO_Init_2 */
 
