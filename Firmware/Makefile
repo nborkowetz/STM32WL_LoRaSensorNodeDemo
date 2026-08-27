@@ -46,6 +46,10 @@ Core/Src/timer_if.c \
 Core/Src/adc_if.c \
 Core/Src/usart_if.c \
 Core/Src/stm32wlxx_it.c \
+Core/Src/radio_service.c \
+Core/Src/sensor_node.c \
+Core/Src/signal_processing.c \
+Core/Src/telemetry.c \
 Core/Src/stm32wlxx_hal_msp.c \
 LoRaWAN/App/app_lorawan.c \
 LoRaWAN/App/CayenneLpp.c \
