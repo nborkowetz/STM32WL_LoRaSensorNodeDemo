@@ -23,3 +23,7 @@ fp-info-cache
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Firmware build artifacts
+Firmware/build/
+Firmware/compile_commands.json
