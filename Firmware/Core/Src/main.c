@@ -22,6 +22,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "sensor_node.h"
+#include "sensor_node_port.h"
 
 /* USER CODE END Includes */
 
@@ -110,6 +112,7 @@ int main(void)
   MX_TIM2_Init();
   MX_LoRaWAN_Init();
   /* USER CODE BEGIN 2 */
+  SensorNodePort_Init();
 
   /* USER CODE END 2 */
 
@@ -132,6 +135,7 @@ int main(void)
     MX_LoRaWAN_Process();
 
     /* USER CODE BEGIN 3 */
+    SensorNode_Process();
   }
   /* USER CODE END 3 */
 }
