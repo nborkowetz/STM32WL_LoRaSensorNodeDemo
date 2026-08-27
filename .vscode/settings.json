@@ -1,0 +1,11 @@
+{
+    "C_Cpp.intelliSenseEngine": "disabled",
+    
+    "clangd.arguments" : [
+        "--compile-commands-dir=Firmware",
+        "--query-driver=/usr/bin/arm-none-eabi-gcc",
+        "--background-index"
+    ],
+
+    "clangd.detectExtensionConflicts": true
+}
