@@ -55,6 +55,7 @@ static void FinishAcquisition(void)
     platform_api.AdcStopDma();
   }
   state = SENSOR_NODE_PROCESSING;
+  APP_LOG(TS_ON, VLEVEL_M, "Stop  acquisition\r\n");
 }
 
 static void ProcessAdcBlock(const uint16_t *samples, uint32_t available_samples)
@@ -72,6 +73,8 @@ static void ProcessAdcBlock(const uint16_t *samples, uint32_t available_samples)
 
 void SensorNode_Init(const SensorNodePlatform_t *platform)
 {
+  APP_LOG(TS_ON, VLEVEL_M, "Sensor initialization\r\n");
+
   memset(&platform_api, 0, sizeof(platform_api));
   if (platform != NULL)
   {
@@ -89,6 +92,8 @@ void SensorNode_Init(const SensorNodePlatform_t *platform)
   UTIL_TIMER_Create(&warmup_timer, APP_SENSOR_WARMUP_MS,
                     UTIL_TIMER_ONESHOT, WarmupTimerCallback, NULL);
   UTIL_TIMER_Start(&acquisition_timer);
+
+  APP_LOG(TS_ON, VLEVEL_M, "Start acquisition timer\r\n");
 }
 
 void SensorNode_Process(void)
@@ -106,6 +111,7 @@ void SensorNode_Process(void)
         UTIL_TIMER_SetPeriod(&warmup_timer, APP_SENSOR_WARMUP_MS);
         UTIL_TIMER_Start(&warmup_timer);
         state = SENSOR_NODE_WARMUP;
+        APP_LOG(TS_ON, VLEVEL_M, "Start sensor warmup\r\n");
       }
       break;
 
@@ -125,6 +131,7 @@ void SensorNode_Process(void)
         else
         {
           state = SENSOR_NODE_ACQUISITION;
+          APP_LOG(TS_ON, VLEVEL_M, "Starting acquisition\r\n");
         }
       }
       break;
@@ -141,9 +148,11 @@ void SensorNode_Process(void)
       if ((events & ADC_EVENT_HALF) != 0U)
       {
         ProcessAdcBlock(&adc_dma_buffer[0], APP_ADC_DMA_HALF_SAMPLES);
+        APP_LOG(TS_ON, VLEVEL_M, "Half data processed\r\n");
       }
       if (((events & ADC_EVENT_FULL) != 0U) &&
           (processed_samples < APP_ACQUISITION_TOTAL_SAMPLES))
+          APP_LOG(TS_ON, VLEVEL_M, "Full data processed\r\n");
       {
         ProcessAdcBlock(&adc_dma_buffer[APP_ADC_DMA_HALF_SAMPLES], APP_ADC_DMA_HALF_SAMPLES);
       }
@@ -156,18 +165,23 @@ void SensorNode_Process(void)
 
     case SENSOR_NODE_PROCESSING:
     {
-      SignalStatistics_t statistics;
+      SignalAverages_t averages;
       uint32_t timestamp = (platform_api.GetTimeMs != NULL) ? platform_api.GetTimeMs() : 0U;
 
-      SignalProcessing_Finalize(&statistics);
-      Telemetry_Update(timestamp, &statistics);
+      SignalProcessing_Finalize(&averages);
+      if (!Telemetry_Update(timestamp, &averages))
+      {
+        APP_LOG(TS_ON, VLEVEL_M, "Telemetry batch still pending; acquisition not stored\r\n");
+      }
 
       if (platform_api.SensorPowerSet != NULL)
       {
         platform_api.SensorPowerSet(false);
       }
       APP_LOG(TS_ON, VLEVEL_M, "Acquisition complete: %lu samples\r\n",
-              statistics.input_sample_count);
+              averages.input_sample_count[0]);
+
+      APP_LOG(TS_ON, VLEVEL_M, "misured voltage reference: %lu\r\n", averages.mean[3]);      
       state = SENSOR_NODE_IDLE;
       break;
     }

@@ -5,19 +5,18 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#include "app_config.h"
+
 typedef struct
 {
-  int16_t minimum;
-  int16_t maximum;
-  int32_t mean_q15;
-  uint32_t rms_q15;
-  uint32_t input_sample_count;
-  uint32_t output_sample_count;
-} SignalStatistics_t;
+  uint16_t mean[APP_ADC_CHANNEL_COUNT];
+  uint32_t input_sample_count[APP_ADC_CHANNEL_COUNT];
+  uint32_t averaged_sample_count[APP_ADC_CHANNEL_COUNT];
+} SignalAverages_t;
 
 void SignalProcessing_Init(void);
 void SignalProcessing_Reset(void);
 void SignalProcessing_ProcessBlock(const uint16_t *adc_samples, size_t count);
-void SignalProcessing_Finalize(SignalStatistics_t *statistics);
+void SignalProcessing_Finalize(SignalAverages_t *averages);
 
 #endif /* SENSOR_NODE_SIGNAL_PROCESSING_H */

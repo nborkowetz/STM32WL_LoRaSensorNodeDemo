@@ -40,6 +40,7 @@
 #include "stm32_lpm.h"
 
 /* USER CODE BEGIN Includes */
+#include "radio_service.h"
 
 /* USER CODE END Includes */
 
@@ -552,6 +553,7 @@ static void EventCallback(void)
         APP_LOG(TS_OFF, VLEVEL_M,  "Event received: JOINED\r\n");
         APP_LOG(TS_OFF, VLEVEL_H,  "Modem is now joined \r\n");
         /* USER CODE BEGIN EventCallback_1 */
+        RadioService_OnJoined();
 
         /* USER CODE END EventCallback_1 */
         if (CertMode == false)
@@ -569,6 +571,8 @@ static void EventCallback(void)
         APP_LOG(TS_OFF, VLEVEL_H,  "Transmission done \r\n");
         smtc_modem_get_status(STACK_ID, &status_mask);
         /* USER CODE BEGIN EventCallback_2 */
+        RadioService_OnTxDone(current_event.event_data.txdone.status !=
+                              SMTC_MODEM_EVENT_TXDONE_NOT_SENT);
 
         /* USER CODE END EventCallback_2 */
         break;
@@ -588,6 +592,7 @@ static void EventCallback(void)
         APP_LOG(TS_OFF, VLEVEL_M,  "Event received: JOINFAIL\r\n");
         smtc_modem_get_status(STACK_ID, &status_mask);
         /* USER CODE BEGIN EventCallback_4 */
+        RadioService_OnJoinFailed();
 
         /* USER CODE END EventCallback_4 */
         break;

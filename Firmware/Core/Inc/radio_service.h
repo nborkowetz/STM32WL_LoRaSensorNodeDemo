@@ -10,6 +10,6 @@ bool RadioService_IsTxInProgress(void);
 /* Forward the corresponding LBM events from lora_app.c. */
 void RadioService_OnJoined(void);
 void RadioService_OnJoinFailed(void);
-void RadioService_OnTxDone(void);
+void RadioService_OnTxDone(bool sent);
 
 #endif /* SENSOR_NODE_RADIO_SERVICE_H */

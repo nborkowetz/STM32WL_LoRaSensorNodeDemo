@@ -9,13 +9,13 @@
 
 typedef struct
 {
-  uint32_t sequence;
   uint32_t acquisition_timestamp_ms;
-  SignalStatistics_t signal;
+  uint16_t mean[APP_ADC_CHANNEL_COUNT];
 } Telemetry_t;
 
-void Telemetry_Update(uint32_t timestamp_ms, const SignalStatistics_t *statistics);
+bool Telemetry_Update(uint32_t timestamp_ms, const SignalAverages_t *averages);
 bool Telemetry_IsReady(void);
 size_t Telemetry_Serialize(uint8_t *payload, size_t capacity);
+void Telemetry_CommitSerialized(void);
 
 #endif /* SENSOR_NODE_TELEMETRY_H */

@@ -3,50 +3,86 @@
 #include <limits.h>
 #include <string.h>
 
-#include "app_config.h"
-
-static const int16_t fir_coefficients[APP_FIR_TAP_COUNT] = APP_FIR_COEFFICIENTS_Q15;
+typedef struct
+{
+  int32_t x1;
+  int32_t x2;
+  int32_t y1;
+  int32_t y2;
+} BiquadState_t;
 
 typedef struct
 {
-  int16_t history[APP_FIR_TAP_COUNT];
-  uint16_t history_index;
-  uint16_t decimation_phase;
-  int16_t minimum;
-  int16_t maximum;
+  uint32_t discard_count;
+  BiquadState_t biquad[APP_IIR_BIQUAD_STAGE_COUNT];
   int64_t sum;
-  uint64_t sum_of_squares;
   uint32_t input_count;
   uint32_t output_count;
 } SignalProcessingContext_t;
 
-static SignalProcessingContext_t context;
+static const int32_t biquad_coefficients_q30[APP_IIR_BIQUAD_STAGE_COUNT][5] =
+  APP_IIR_BIQUAD_COEFFICIENTS_Q30;
+static SignalProcessingContext_t contexts[APP_ADC_CHANNEL_COUNT];
+static uint16_t next_channel;
 
-static uint32_t IntegerSqrt64(uint64_t value)
+static uint16_t QStateToAdc12(int64_t value)
 {
-  uint64_t result = 0U;
-  uint64_t bit = (uint64_t) 1U << 62;
+  const int64_t maximum = (int64_t) 4095 << APP_IIR_STATE_FRACTIONAL_BITS;
 
-  while (bit > value)
+  if (value >= maximum)
   {
-    bit >>= 2;
+    return 4095U;
   }
-
-  while (bit != 0U)
+  if (value <= 0)
   {
-    if (value >= (result + bit))
+    return 0U;
+  }
+  value += (int64_t) 1 << (APP_IIR_STATE_FRACTIONAL_BITS - 1U);
+  return (uint16_t) (value >> APP_IIR_STATE_FRACTIONAL_BITS);
+}
+
+static int32_t ProcessIir(SignalProcessingContext_t *context, int32_t input)
+{
+  uint16_t stage;
+  int32_t output = input;
+
+  for (stage = 0U; stage < APP_IIR_BIQUAD_STAGE_COUNT; stage++)
+  {
+    BiquadState_t *state = &context->biquad[stage];
+    const int32_t *coefficient = biquad_coefficients_q30[stage];
+    int64_t accumulator = ((int64_t) coefficient[0] * input) +
+                          ((int64_t) coefficient[1] * state->x1) +
+                          ((int64_t) coefficient[2] * state->x2) -
+                          ((int64_t) coefficient[3] * state->y1) -
+                          ((int64_t) coefficient[4] * state->y2);
+
+    if (accumulator >= 0)
     {
-      value -= result + bit;
-      result = (result >> 1) + bit;
+      accumulator = (accumulator + (1LL << 29)) >> 30;
     }
     else
     {
-      result >>= 1;
+      accumulator = -(((-accumulator) + (1LL << 29)) >> 30);
     }
-    bit >>= 2;
+    if (accumulator > INT32_MAX)
+    {
+      output = INT32_MAX;
+    }
+    else if (accumulator < INT32_MIN)
+    {
+      output = INT32_MIN;
+    }
+    else
+    {
+      output = (int32_t) accumulator;
+    }
+    state->x2 = state->x1;
+    state->x1 = input;
+    state->y2 = state->y1;
+    state->y1 = output;
+    input = output;
   }
-
-  return (uint32_t) result;
+  return output;
 }
 
 void SignalProcessing_Init(void)
@@ -56,9 +92,14 @@ void SignalProcessing_Init(void)
 
 void SignalProcessing_Reset(void)
 {
-  memset(&context, 0, sizeof(context));
-  context.minimum = INT16_MAX;
-  context.maximum = INT16_MIN;
+  uint16_t channel;
+
+  memset(contexts, 0, sizeof(contexts));
+  next_channel = 0U;
+  for (channel = 0U; channel < APP_ADC_CHANNEL_COUNT; channel++)
+  {
+    contexts[channel].discard_count = APP_IIR_DISCARD_SAMPLE_COUNT;
+  }
 }
 
 void SignalProcessing_ProcessBlock(const uint16_t *adc_samples, size_t count)
@@ -72,72 +113,47 @@ void SignalProcessing_ProcessBlock(const uint16_t *adc_samples, size_t count)
 
   for (sample_index = 0U; sample_index < count; sample_index++)
   {
-    int64_t accumulator = 0;
-    uint16_t tap;
-    int16_t signed_sample = (int16_t) ((int32_t) adc_samples[sample_index] - 2048);
+    SignalProcessingContext_t *context = &contexts[next_channel];
+    int32_t filtered;
 
-    context.history[context.history_index] = signed_sample;
-    context.history_index = (uint16_t) ((context.history_index + 1U) % APP_FIR_TAP_COUNT);
-    context.input_count++;
-
-    if (context.decimation_phase == 0U)
+    context->input_count++;
+    filtered = ProcessIir(context,
+      (int32_t) adc_samples[sample_index] << APP_IIR_STATE_FRACTIONAL_BITS);
+    if (context->discard_count != 0U)
     {
-      uint16_t history_position = context.history_index;
-
-      for (tap = 0U; tap < APP_FIR_TAP_COUNT; tap++)
-      {
-        history_position = (history_position == 0U) ? (APP_FIR_TAP_COUNT - 1U) : (history_position - 1U);
-        accumulator += (int32_t) context.history[history_position] * fir_coefficients[tap];
-      }
-
-      accumulator >>= 15;
-      if (accumulator > INT16_MAX)
-      {
-        accumulator = INT16_MAX;
-      }
-      else if (accumulator < INT16_MIN)
-      {
-        accumulator = INT16_MIN;
-      }
-
-      if ((int16_t) accumulator < context.minimum)
-      {
-        context.minimum = (int16_t) accumulator;
-      }
-      if ((int16_t) accumulator > context.maximum)
-      {
-        context.maximum = (int16_t) accumulator;
-      }
-
-      context.sum += accumulator;
-      context.sum_of_squares += (uint64_t) (accumulator * accumulator);
-      context.output_count++;
+      context->discard_count--;
+    }
+    else
+    {
+      context->sum += filtered;
+      context->output_count++;
     }
 
-    context.decimation_phase++;
-    if (context.decimation_phase >= APP_DECIMATION_FACTOR)
-    {
-      context.decimation_phase = 0U;
-    }
+    next_channel = (uint16_t) ((next_channel + 1U) % APP_ADC_CHANNEL_COUNT);
   }
 }
 
-void SignalProcessing_Finalize(SignalStatistics_t *statistics)
+void SignalProcessing_Finalize(SignalAverages_t *averages)
 {
-  if (statistics == NULL)
+  uint16_t channel;
+
+  if (averages == NULL)
   {
     return;
   }
 
-  memset(statistics, 0, sizeof(*statistics));
-  statistics->input_sample_count = context.input_count;
-  statistics->output_sample_count = context.output_count;
-
-  if (context.output_count != 0U)
+  memset(averages, 0, sizeof(*averages));
+  for (channel = 0U; channel < APP_ADC_CHANNEL_COUNT; channel++)
   {
-    statistics->minimum = context.minimum;
-    statistics->maximum = context.maximum;
-    statistics->mean_q15 = (int32_t) (context.sum / (int64_t) context.output_count);
-    statistics->rms_q15 = IntegerSqrt64(context.sum_of_squares / context.output_count);
+    const SignalProcessingContext_t *context = &contexts[channel];
+
+    averages->input_sample_count[channel] = context->input_count;
+    averages->averaged_sample_count[channel] = context->output_count;
+    if (context->output_count != 0U)
+    {
+      int64_t rounded_sum = context->sum + ((int64_t) context->output_count / 2);
+      averages->mean[channel] = QStateToAdc12(
+        rounded_sum / (int64_t) context->output_count);
+    }
   }
 }
