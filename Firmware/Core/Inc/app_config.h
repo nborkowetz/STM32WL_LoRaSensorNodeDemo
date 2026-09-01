@@ -19,7 +19,7 @@
 #define APP_LORAWAN_CONFIRMED           (false)
 #define APP_TX_PAYLOAD_MAX_SIZE         (51U)
 #define APP_TELEMETRY_BATCH_COUNT       (6U)
-#define APP_TELEMETRY_HEADER_SIZE       (8U)
+#define APP_TELEMETRY_HEADER_SIZE       (6U)
 #define APP_TELEMETRY_MEAN_BITS         (10U)
 #define APP_TELEMETRY_VARIANCE_BITS     (4U)
 #define APP_TELEMETRY_PAYLOAD_SIZE      \

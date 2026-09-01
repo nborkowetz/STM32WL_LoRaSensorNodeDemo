@@ -11,12 +11,6 @@ static uint16_t batch_sequence;
 static uint8_t batch_count;
 static bool serialized_record_pending;
 
-static void PutU16Be(uint8_t *destination, uint16_t value)
-{
-  destination[0] = (uint8_t) (value >> 8);
-  destination[1] = (uint8_t) value;
-}
-
 static void PutU32Be(uint8_t *destination, uint32_t value)
 {
   destination[0] = (uint8_t) (value >> 24);
@@ -94,10 +88,9 @@ size_t Telemetry_Serialize(uint8_t *payload, size_t capacity)
   }
 
   memset(payload, 0, TELEMETRY_RECORD_SIZE);
-  payload[0] = 5U; /* Payload format version. */
-  payload[1] = APP_TELEMETRY_BATCH_COUNT;
-  PutU16Be(&payload[2], batch_sequence);
-  PutU32Be(&payload[4], batch[0].acquisition_timestamp_ms);
+  payload[0] = 6U; /* Payload format version; implies six acquisitions. */
+  payload[1] = (uint8_t) batch_sequence;
+  PutU32Be(&payload[2], batch[0].acquisition_timestamp_ms);
 
   for (acquisition = 0U; acquisition < APP_TELEMETRY_BATCH_COUNT; acquisition++)
   {
