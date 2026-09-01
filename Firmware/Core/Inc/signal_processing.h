@@ -10,7 +10,7 @@
 typedef struct
 {
   uint16_t mean[APP_ADC_CHANNEL_COUNT];
-  uint16_t variance[APP_ADC_CHANNEL_COUNT];
+  uint32_t variance[APP_ADC_CHANNEL_COUNT];
   uint32_t input_sample_count[APP_ADC_CHANNEL_COUNT];
   uint32_t averaged_sample_count[APP_ADC_CHANNEL_COUNT];
 } SignalStatistics_t;

@@ -25,6 +25,38 @@ static void PutU32Be(uint8_t *destination, uint32_t value)
   destination[3] = (uint8_t) value;
 }
 
+/* Code 0 represents zero. Codes 1..14 represent the inclusive ranges
+ * 2^(code-1)..2^code-1 ADC^2. Code 15 represents every value >= 16384 ADC^2. */
+static uint8_t EncodeVarianceLog4(uint32_t variance)
+{
+  uint8_t code = 0U;
+
+  while ((variance != 0U) && (code < 15U))
+  {
+    variance >>= 1;
+    code++;
+  }
+  return code;
+}
+
+static void PutBitsMsbFirst(uint8_t *payload, size_t *bit_offset,
+                            uint32_t value, uint8_t bit_count)
+{
+  uint8_t bit;
+
+  for (bit = bit_count; bit > 0U; bit--)
+  {
+    size_t byte_index = *bit_offset / 8U;
+    uint8_t destination_bit = (uint8_t) (7U - (*bit_offset % 8U));
+
+    if (((value >> (bit - 1U)) & 1U) != 0U)
+    {
+      payload[byte_index] |= (uint8_t) (1U << destination_bit);
+    }
+    (*bit_offset)++;
+  }
+}
+
 bool Telemetry_Update(uint32_t timestamp_ms, const SignalStatistics_t *statistics)
 {
   if ((statistics == NULL) || (batch_count >= APP_TELEMETRY_BATCH_COUNT))
@@ -52,7 +84,7 @@ bool Telemetry_IsReady(void)
 
 size_t Telemetry_Serialize(uint8_t *payload, size_t capacity)
 {
-  size_t offset = APP_TELEMETRY_HEADER_SIZE;
+  size_t bit_offset = APP_TELEMETRY_HEADER_SIZE * 8U;
   uint8_t acquisition;
 
   if (!Telemetry_IsReady() || (payload == NULL) ||
@@ -61,7 +93,8 @@ size_t Telemetry_Serialize(uint8_t *payload, size_t capacity)
     return 0U;
   }
 
-  payload[0] = 4U; /* Payload format version. */
+  memset(payload, 0, TELEMETRY_RECORD_SIZE);
+  payload[0] = 5U; /* Payload format version. */
   payload[1] = APP_TELEMETRY_BATCH_COUNT;
   PutU16Be(&payload[2], batch_sequence);
   PutU32Be(&payload[4], batch[0].acquisition_timestamp_ms);
@@ -72,17 +105,18 @@ size_t Telemetry_Serialize(uint8_t *payload, size_t capacity)
 
     for (channel = 0U; channel < APP_ADC_CHANNEL_COUNT; channel++)
     {
-      uint16_t mean = batch[acquisition].mean[channel] & 0x0FFFU;
-      uint16_t variance = batch[acquisition].variance[channel] & 0x0FFFU;
+      uint16_t mean10 = (batch[acquisition].mean[channel] >> 2U) & 0x03FFU;
+      uint8_t variance4 = EncodeVarianceLog4(
+        batch[acquisition].variance[channel]);
 
-      payload[offset++] = (uint8_t) (mean >> 4);
-      payload[offset++] = (uint8_t) ((mean << 4) | (variance >> 8));
-      payload[offset++] = (uint8_t) variance;
+      PutBitsMsbFirst(payload, &bit_offset, mean10, APP_TELEMETRY_MEAN_BITS);
+      PutBitsMsbFirst(payload, &bit_offset, variance4,
+                      APP_TELEMETRY_VARIANCE_BITS);
     }
   }
 
   serialized_record_pending = true;
-  return offset;
+  return (bit_offset + 7U) / 8U;
 }
 
 void Telemetry_CommitSerialized(void)

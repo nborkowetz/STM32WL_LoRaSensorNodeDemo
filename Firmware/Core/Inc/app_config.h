@@ -18,14 +18,14 @@
 #define APP_LORAWAN_PORT                (10U)
 #define APP_LORAWAN_CONFIRMED           (false)
 #define APP_TX_PAYLOAD_MAX_SIZE         (51U)
-#define APP_TELEMETRY_BATCH_COUNT       (3U)
+#define APP_TELEMETRY_BATCH_COUNT       (6U)
 #define APP_TELEMETRY_HEADER_SIZE       (8U)
-#define APP_TELEMETRY_VALUE_BITS        (12U)
-#define APP_TELEMETRY_CHANNEL_SIZE      (3U) /* 12-bit mean + 12-bit variance. */
+#define APP_TELEMETRY_MEAN_BITS         (10U)
+#define APP_TELEMETRY_VARIANCE_BITS     (4U)
 #define APP_TELEMETRY_PAYLOAD_SIZE      \
   (APP_TELEMETRY_HEADER_SIZE + \
-   (APP_TELEMETRY_BATCH_COUNT * APP_ADC_CHANNEL_COUNT * \
-    APP_TELEMETRY_CHANNEL_SIZE))
+   ((APP_TELEMETRY_BATCH_COUNT * APP_ADC_CHANNEL_COUNT * \
+     (APP_TELEMETRY_MEAN_BITS + APP_TELEMETRY_VARIANCE_BITS) + 7U) / 8U))
 
 #if ((APP_ADC_DMA_BUFFER_SAMPLES % 2U) != 0U)
 #error "APP_ADC_DMA_BUFFER_SAMPLES must be even"
@@ -39,8 +39,8 @@
 #error "APP_ACQUISITION_TOTAL_SAMPLES must contain complete ADC scan sequences"
 #endif
 
-#if (APP_TELEMETRY_VALUE_BITS != 12U)
-#error "Telemetry serializer currently requires 12-bit values"
+#if ((APP_TELEMETRY_MEAN_BITS != 10U) || (APP_TELEMETRY_VARIANCE_BITS != 4U))
+#error "Telemetry serializer currently requires 10-bit means and 4-bit variances"
 #endif
 
 #if (APP_TX_PAYLOAD_MAX_SIZE < APP_TELEMETRY_PAYLOAD_SIZE)

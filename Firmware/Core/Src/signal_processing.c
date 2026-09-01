@@ -79,9 +79,9 @@ void SignalProcessing_Finalize(SignalStatistics_t *statistics)
 
       statistics->mean[channel] = SaturateTo12Bits(
         (context->sum + (count / 2U)) / count);
-      statistics->variance[channel] = SaturateTo12Bits(
-        (variance_numerator + (variance_denominator / 2U)) /
-        variance_denominator);
+      statistics->variance[channel] = (uint32_t)
+        ((variance_numerator + (variance_denominator / 2U)) /
+         variance_denominator);
     }
   }
 }

@@ -11,7 +11,7 @@ typedef struct
 {
   uint32_t acquisition_timestamp_ms;
   uint16_t mean[APP_ADC_CHANNEL_COUNT];
-  uint16_t variance[APP_ADC_CHANNEL_COUNT];
+  uint32_t variance[APP_ADC_CHANNEL_COUNT];
 } Telemetry_t;
 
 bool Telemetry_Update(uint32_t timestamp_ms, const SignalStatistics_t *statistics);
