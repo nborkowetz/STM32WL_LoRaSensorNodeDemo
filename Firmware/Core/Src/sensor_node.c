@@ -152,9 +152,9 @@ void SensorNode_Process(void)
       }
       if (((events & ADC_EVENT_FULL) != 0U) &&
           (processed_samples < APP_ACQUISITION_TOTAL_SAMPLES))
-          APP_LOG(TS_ON, VLEVEL_M, "Full data processed\r\n");
       {
         ProcessAdcBlock(&adc_dma_buffer[APP_ADC_DMA_HALF_SAMPLES], APP_ADC_DMA_HALF_SAMPLES);
+        APP_LOG(TS_ON, VLEVEL_M, "Full data processed\r\n");
       }
       if (processed_samples >= APP_ACQUISITION_TOTAL_SAMPLES)
       {
@@ -165,11 +165,11 @@ void SensorNode_Process(void)
 
     case SENSOR_NODE_PROCESSING:
     {
-      SignalAverages_t averages;
+      SignalStatistics_t statistics;
       uint32_t timestamp = (platform_api.GetTimeMs != NULL) ? platform_api.GetTimeMs() : 0U;
 
-      SignalProcessing_Finalize(&averages);
-      if (!Telemetry_Update(timestamp, &averages))
+      SignalProcessing_Finalize(&statistics);
+      if (!Telemetry_Update(timestamp, &statistics))
       {
         APP_LOG(TS_ON, VLEVEL_M, "Telemetry batch still pending; acquisition not stored\r\n");
       }
@@ -179,9 +179,9 @@ void SensorNode_Process(void)
         platform_api.SensorPowerSet(false);
       }
       APP_LOG(TS_ON, VLEVEL_M, "Acquisition complete: %lu samples\r\n",
-              averages.input_sample_count[0]);
+              statistics.input_sample_count[0]);
 
-      APP_LOG(TS_ON, VLEVEL_M, "misured voltage reference: %lu\r\n", averages.mean[3]);      
+      APP_LOG(TS_ON, VLEVEL_M, "misured voltage reference: %lu\r\n", statistics.mean[3]);
       state = SENSOR_NODE_IDLE;
       break;
     }

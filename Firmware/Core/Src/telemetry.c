@@ -25,9 +25,9 @@ static void PutU32Be(uint8_t *destination, uint32_t value)
   destination[3] = (uint8_t) value;
 }
 
-bool Telemetry_Update(uint32_t timestamp_ms, const SignalAverages_t *averages)
+bool Telemetry_Update(uint32_t timestamp_ms, const SignalStatistics_t *statistics)
 {
-  if ((averages == NULL) || (batch_count >= APP_TELEMETRY_BATCH_COUNT))
+  if ((statistics == NULL) || (batch_count >= APP_TELEMETRY_BATCH_COUNT))
   {
     return false;
   }
@@ -37,8 +37,10 @@ bool Telemetry_Update(uint32_t timestamp_ms, const SignalAverages_t *averages)
     batch_sequence++;
   }
   batch[batch_count].acquisition_timestamp_ms = timestamp_ms;
-  memcpy(batch[batch_count].mean, averages->mean,
+  memcpy(batch[batch_count].mean, statistics->mean,
          sizeof(batch[batch_count].mean));
+  memcpy(batch[batch_count].variance, statistics->variance,
+         sizeof(batch[batch_count].variance));
   batch_count++;
   return true;
 }
@@ -59,7 +61,7 @@ size_t Telemetry_Serialize(uint8_t *payload, size_t capacity)
     return 0U;
   }
 
-  payload[0] = 3U; /* Payload format version. */
+  payload[0] = 4U; /* Payload format version. */
   payload[1] = APP_TELEMETRY_BATCH_COUNT;
   PutU16Be(&payload[2], batch_sequence);
   PutU32Be(&payload[4], batch[0].acquisition_timestamp_ms);
@@ -68,14 +70,14 @@ size_t Telemetry_Serialize(uint8_t *payload, size_t capacity)
   {
     uint8_t channel;
 
-    for (channel = 0U; channel < APP_ADC_CHANNEL_COUNT; channel += 2U)
+    for (channel = 0U; channel < APP_ADC_CHANNEL_COUNT; channel++)
     {
-      uint16_t first = batch[acquisition].mean[channel] & 0x0FFFU;
-      uint16_t second = batch[acquisition].mean[channel + 1U] & 0x0FFFU;
+      uint16_t mean = batch[acquisition].mean[channel] & 0x0FFFU;
+      uint16_t variance = batch[acquisition].variance[channel] & 0x0FFFU;
 
-      payload[offset++] = (uint8_t) (first >> 4);
-      payload[offset++] = (uint8_t) ((first << 4) | (second >> 8));
-      payload[offset++] = (uint8_t) second;
+      payload[offset++] = (uint8_t) (mean >> 4);
+      payload[offset++] = (uint8_t) ((mean << 4) | (variance >> 8));
+      payload[offset++] = (uint8_t) variance;
     }
   }
 
