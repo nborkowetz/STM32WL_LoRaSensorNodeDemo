@@ -4,7 +4,7 @@
 #include <stdbool.h>
 
 /* All application timing values use milliseconds unless explicitly stated. */
-#define APP_ACQUISITION_PERIOD_MS       (5UL * 60UL * 1000UL)
+#define APP_ACQUISITION_PERIOD_MS       (10UL * 1000UL)
 #define APP_SENSOR_WARMUP_MS            (1000UL)
 
 #define APP_ADC_CHANNEL_COUNT           (4U)

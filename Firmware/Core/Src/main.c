@@ -109,7 +109,7 @@ int main(void)
   MX_DMA_Init();
   MX_ADC_Init();
   MX_RNG_Init();
-  MX_RTC_Init();
+  //MX_RTC_Init();
   MX_TIM2_Init();
   MX_LoRaWAN_Init();
   /* USER CODE BEGIN 2 */
