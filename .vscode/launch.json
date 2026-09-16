@@ -13,12 +13,11 @@
             "device": "STM32WL55JCI7",
             "interface": "swd",
 
-            "gdbPath": "/opt/st/stm32cubeide_2.1.1_2/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.linux64_1.0.100.202602081740/tools/bin/arm-none-eabi-gdb",
+            "gdbPath": "/data/workspace/ide/stm32cube/plugins/com.st.stm32cube.ide.mcu.externaltools.gnu-tools-for-stm32.14.3.rel1.linux64_1.0.100.202602081740/tools/bin/arm-none-eabi-gdb",
 
-            "serverpath": "/opt/st/stm32cubeide_2.1.1_2/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.2.400.202601091506/tools/bin/ST-LINK_gdbserver",
+            "serverpath": "/data/workspace/ide/stm32cube/plugins/com.st.stm32cube.ide.mcu.externaltools.stlink-gdb-server.linux64_2.2.500.202604010938/tools/bin/ST-LINK_gdbserver",
 
-            "stm32cubeprogrammer": "/opt/st/stm32cubeide_2.1.1_2/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.2.400.202601091506/tools/bin",
-
+            "stm32cubeprogrammer": "/data/workspace/ide/stm32cube/plugins/com.st.stm32cube.ide.mcu.externaltools.cubeprogrammer.linux64_2.2.500.202603051304/tools/bin/",
             "runToEntryPoint": "main"
         }
     ]
