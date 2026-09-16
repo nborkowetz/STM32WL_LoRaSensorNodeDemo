@@ -24,6 +24,9 @@ static volatile bool acquisition_due;
 static volatile bool warmup_elapsed;
 static uint32_t processed_samples;
 
+UTIL_TIMER_Status_t create_status;
+UTIL_TIMER_Status_t start_status;
+
 static void AcquisitionTimerCallback(void *context)
 {
   (void) context;
@@ -87,13 +90,16 @@ void SensorNode_Init(const SensorNodePlatform_t *platform)
   warmup_elapsed = false;
   adc_events = 0U;
 
-  UTIL_TIMER_Create(&acquisition_timer, APP_ACQUISITION_PERIOD_MS,
+  create_status = UTIL_TIMER_Create(&acquisition_timer, APP_ACQUISITION_PERIOD_MS,
                     UTIL_TIMER_PERIODIC, AcquisitionTimerCallback, NULL);
   UTIL_TIMER_Create(&warmup_timer, APP_SENSOR_WARMUP_MS,
                     UTIL_TIMER_ONESHOT, WarmupTimerCallback, NULL);
-  UTIL_TIMER_Start(&acquisition_timer);
+  start_status = UTIL_TIMER_Start(&acquisition_timer);
 
-  APP_LOG(TS_ON, VLEVEL_M, "Start acquisition timer\r\n");
+  APP_LOG(TS_ON, VLEVEL_M, "Acq timer start=%d start=%d running=%u\r\n",
+          create_status,
+          start_status, 
+          (unsigned int)UTIL_TIMER_IsRunning(&acquisition_timer));
 }
 
 void SensorNode_Process(void)
