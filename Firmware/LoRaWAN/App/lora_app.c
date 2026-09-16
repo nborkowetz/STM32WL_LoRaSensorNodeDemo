@@ -38,6 +38,7 @@
 #include "flash_if.h"
 #include "lorawan_api.h"
 #include "stm32_lpm.h"
+#include "sensor_node.h"
 
 /* USER CODE BEGIN Includes */
 #include "radio_service.h"
@@ -377,7 +378,10 @@ void LoRaWAN_Process(void)
 
   if ((user_button_is_press == false) && (smtc_modem_is_irq_flag_pending() == false))
   {
-    if (sleep_time_ms > 0)
+    /* TODO: temporary workaround to prevent stop2 when sensor node is active.
+     * Low-power policy must be moved to application scheduler.
+     */
+    if (sleep_time_ms > 0 && (SensorNode_GetState() == SENSOR_NODE_IDLE))
     {
 #if defined (LOW_POWER_DISABLE) && (LOW_POWER_DISABLE == 0)
       UTIL_TIMER_SetPeriod(&SleepTimer, sleep_time_ms);
