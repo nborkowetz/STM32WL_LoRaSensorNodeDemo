@@ -9,6 +9,7 @@
 #include "sys_app.h"
 #include "telemetry.h"
 #include "utilities_def.h"
+#include "stm32wlxx.h"
 
 #define ADC_EVENT_HALF   (1UL << 0)
 #define ADC_EVENT_FULL   (1UL << 1)
@@ -100,6 +101,9 @@ void SensorNode_Init(const SensorNodePlatform_t *platform)
           create_status,
           start_status, 
           (unsigned int)UTIL_TIMER_IsRunning(&acquisition_timer));
+
+  APP_LOG(TS_ON, VLEVEL_M, "VREFINT_CAL = %u\r\n", (unsigned int)(*VREFINT_CAL_ADDR));
+  
 }
 
 void SensorNode_Process(void)
@@ -184,10 +188,10 @@ void SensorNode_Process(void)
       {
         platform_api.SensorPowerSet(false);
       }
-      APP_LOG(TS_ON, VLEVEL_M, "Acquisition complete: %lu samples\r\n",
+      APP_LOG(TS_ON, VLEVEL_M, "Acquisition complete: %u samples\r\n",
               statistics.input_sample_count[0]);
 
-      APP_LOG(TS_ON, VLEVEL_M, "misured voltage reference: %lu\r\n", statistics.mean[3]);
+      APP_LOG(TS_ON, VLEVEL_M, "misured voltage reference: %u\r\n", statistics.mean[3]);
       state = SENSOR_NODE_IDLE;
       break;
     }
